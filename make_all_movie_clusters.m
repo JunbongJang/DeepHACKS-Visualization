@@ -6,24 +6,32 @@
 clear all;
 close all;
 %% Define these parameters before running
-path_windowing = '\\research.wpi.edu\leelab\QCI dropbox\Kwonmoo\Windowing\120217_CK666-CK689_not_Paired_50uM\';
 path_windowing_package = 'WindowingPackage\protrusion_samples';
-path_cluster = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\03-30-2020-DMSO_CyD\ordered_cluster_label_K_770.mat';
-
 % Fine Grained Accelerating / Bursting
 path_cluster_FG_Acc = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\05-02-2020-Acceleration_DeepFeatures_Including_alldata\420 DMSO_CC_K_DeepFeatures_truncated_community.mat'
 path_total_FG_Acc = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\05-02-2020-Acceleration_DeepFeatures_Including_alldata\Data_total.mat'
-
 path_cluster_FG_Burst = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\05-03-2020-Bursting_DeepFeatures_Including_alldata\340 Bursting_K_DeepFeatures_truncated_community.mat'
 path_total_FG_Burst = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\05-03-2020-Bursting_DeepFeatures_Including_alldata\Data_total.mat'
 
+path_windowing = '\\research.wpi.edu\leelab\QCI dropbox\Kwonmoo\Windowing\120217_CK666-CK689_not_Paired_50uM\';
+path_cluster = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\03-29-2020-CK666\ordered_CK689_CK666_K_truncated_240_community.mat';
+%'\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\03-30-2020-DMSO_CyD\ordered_cluster_label_K_770.mat';
+path_truncated = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\03-29-2020-CK666\truncated_dataset.mat';
 path_dminpool = '\\research.wpi.edu\leelab\Chauncey\Projects\paper1\2017-12-15-arp23_inhibitor_50nm\Control\results\larger_56\dminpool_more_56.mat';
 cellnames = {'120217_S02_CK689_50uM_06'; '120217_S02_CK689_50uM_09'};
+
+% path_windowing = '\\research.wpi.edu\leelab\QCI dropbox2\HeeJune (QCI)\Windowing\CyD 122217\';
+% path_cluster = '\\research.wpi.edu\leelab\Chauncey\Projects\Paper_DeepHACKS_V3_10\Data_analysis_each_EXP\03-30-2020-DMSO_CyD\ordered_cluster_label_K_770.mat';
+
+% path_dminpool = '\\research.wpi.edu\leelab\Chauncey\Projects\paper1\2017-12-26-CyD_50uM_patch2\Control\results\larger_56\dminpool_more_56.mat';
+% cellnames = {'122217_S02_DMSO_02'; '122217_S02_DMSO_05';'122217_S02_DMSO_08';'122217_S02_DMSO_20';'122217_S02_DMSO_21';'122217_S02_DMSO_22'};
+
+%%
 row = size(cellnames,1);
 
 % set the color for the different cluster.
-%cluster_cmap = [[1,1,1];[37,22,5]/255;[193,193,193]/255;[51,187,238]/255; [233,217,133]/255; [178,189,126]/255; [116,156,117]/255; [238,51,119]/255];
-cluster_cmap = [[1,1,1];[37,22,5]/255;[193,193,193]/255;
+cluster_cmap = [[1,1,1];[37,22,5]/255;[193,193,193]/255;[51,187,238]/255; [233,217,133]/255; [178,189,126]/255; [116,156,117]/255; [238,51,119]/255];
+FG_cluster_cmap = [[1,1,1];[37,22,5]/255;[193,193,193]/255;
     [79,245,250]/255;[51,94,238]/255;[130,60,161]/255;[51,187,238]/255;
     [233,217,133]/255; [178,189,126]/255; [116,156,117]/255; 
     [195,51,238]/255;[238,51,188]/255;[238,51,119]/255];
@@ -31,7 +39,7 @@ cluster_cmap = [[1,1,1];[37,22,5]/255;[193,193,193]/255;
 % For edge and windowing evolution image
 edge_evolution_line_thickness = 1;
 frame_interval = 10;
-start_frame = 100;
+start_frame = 1;
 end_frame = 200; % set it to -1 if you don't know
 
 % For windowing evolution movie
@@ -43,7 +51,8 @@ mkdir(saved_folder);
 
 %%
 %load the data and get the mean value
-cluster_all_old = load(path_cluster).ordered_cluster_label;
+cluster_all_old = load(path_cluster);
+truncated_cells = load(path_truncated);
 cluster_FG_Acc = load(path_cluster_FG_Acc).cluster_label;
 cluster_FG_Burst = load(path_cluster_FG_Burst).cluster_label;
 cellname_FG_Acc = load(path_total_FG_Acc).Cellname_total;
@@ -53,7 +62,7 @@ if size(cluster_FG_Acc,1) ~= size(cellname_FG_Acc,2) || size(cluster_FG_Burst,1)
     ME = MException('ClusterData:LengthDifferent', 'Cluster and cellname not same length');
     throw(ME)
 end
-cl = cluster_all_old;
+cl = cluster_all_old.ordered_cluster_label;
 num_cluster = max(cl(:));
 
 %%
@@ -62,7 +71,7 @@ dminpool_more_56 = load(path_dminpool);
 symbolic_dataset = dminpool_more_56.dminpool_more_56;
 
 %%
-for i = 1 : 1 %row
+for i = 1 : row
     i
     cell_name = cellnames{i,1};
     movieData = load([path_windowing, cell_name, '\movieData.mat']);
@@ -71,7 +80,7 @@ for i = 1 : 1 %row
     if end_frame < 0 || end_frame > nFrame
         end_frame = nFrame;
     end
-    frame_list = [start_frame : frame_interval: end_frame];
+    frame_list = [start_frame : frame_interval: end_frame, end_frame];
     
     % call extract_backimage_information for each cell.
     [time, windowing, cluster, dminpoolv, duration_time] = extract_backimage_information_for_each_cell(symbolic_dataset, cell_name, cl);
@@ -92,28 +101,29 @@ for i = 1 : 1 %row
     save([saved_folder,'\', cell_name, '\time_windowing_cluster.mat'], 'time', 'windowing', 'cluster');
     
     %% make images and movies
+    cluster_cmap = FG_cluster_cmap;
     movie_cluster_cmap = cluster_cmap(3:end,:,:);  % since we don't need background color and white color for frames after 251
-%     make_evolution_movie(movieData, windowing, time, FG_cluster, num_cluster, duration_time, movie_cluster_cmap, cell_name, video_format, frame_rate, savePath);
-    make_evolution_image(movieData, windowing, time, FG_cluster, num_cluster, duration_time, movie_cluster_cmap, frame_list, edge_evolution_line_thickness, savePath);
+%     make_evolution_movie(movieData, windowing, time, cluster, num_cluster, duration_time, movie_cluster_cmap, cell_name, video_format, frame_rate, savePath);
+    make_evolution_image(movieData, windowing, time, cluster, num_cluster, duration_time, movie_cluster_cmap, frame_list, edge_evolution_line_thickness, savePath);
 
     %% protrusion and cluster heatmap
-%     protSamples = load(fullfile(fullfile(fullfile(path_windowing, cell_name), path_windowing_package), 'protrusion_samples.mat'));
-%     vel = protSamples.protSamples.avgNormal;
-%     
-%     figure(3)
-%     font = 'Arial';
-%     set(gcf, 'Position', [10 10 1800 600],'DefaultTextFontName', font, 'DefaultAxesFontName', font);
-%     sgtitle(cell_name, 'interpreter', 'none','FontSize',20);
-%     
-%     subplot(1,3,1);
-%     draw_protrusion_heatmap(vel, cell_name, saved_folder)
-%     subplot(1,3,2);
-%     draw_cluster_heatmap(cluster_cmap, vel, windowing, time, cluster, dminpoolv, cell_name, saved_folder, -1, '')
-%     subplot(1,3,3);
-%     draw_cluster_heatmap(cluster_cmap, vel, windowing, time, cluster, dminpoolv, cell_name, saved_folder, 251, [newline, '(selected timeseries)'])
-%     
-%     saveas(gcf, [saved_folder, '\', cell_name, '\protrusion_velocity_phenotype_cluster.fig']);
-%     saveas(gcf, [saved_folder, '\', cell_name, '\protrusion_velocity_phenotype_cluster.png']);
+    protSamples = load(fullfile(fullfile(fullfile(path_windowing, cell_name), path_windowing_package), 'protrusion_samples.mat'));
+    vel = protSamples.protSamples.avgNormal;
+    
+    figure(3)
+    font = 'Arial';
+    set(gcf, 'Position', [10 10 1800 600],'DefaultTextFontName', font, 'DefaultAxesFontName', font);
+    sgtitle(cell_name, 'interpreter', 'none','FontSize',20);
+    
+    subplot(1,3,1);
+    draw_protrusion_heatmap(vel, cell_name, saved_folder)
+    subplot(1,3,2);
+    draw_cluster_heatmap(cluster_cmap, vel, windowing, time, cluster, dminpoolv, cell_name, saved_folder, -1, '')
+    subplot(1,3,3);
+    draw_cluster_heatmap(cluster_cmap, vel, windowing, time, cluster, dminpoolv, cell_name, saved_folder, 251, [newline, '(selected timeseries)'])
+    
+    saveas(gcf, [saved_folder, '\', cell_name, '\protrusion_velocity_phenotype_cluster.fig']);
+    saveas(gcf, [saved_folder, '\', cell_name, '\protrusion_velocity_phenotype_cluster.png']);
     
 end
 
