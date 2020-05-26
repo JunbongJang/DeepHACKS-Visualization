@@ -4,13 +4,10 @@
 % Draw windows and edge evolution image with clusters in different colors.
 
 function make_evolution_image(movieData, windowing, time, clusters, N, duration_time, cluster_cmap, frame_list, edge_evolution_line_thickness, savePath)
-replaced_path = 'C:\Users\fanzhang\Dropbox (QCI)\QCI Team Folder\Kwonmoo\';
-root_path = '\\research.wpi.edu\leelab\QCI dropbox\Kwonmoo\';
-
 %Use the raw data as the image directories.
 iWinProc = movieData.getProcessIndex('WindowingProcess', 1, 1);
 imDir = movieData.getChannelPaths{1};
-imDir = strrep(imDir,replaced_path,root_path)
+imDir = replace_root_path(imDir);
 imNames = dir([imDir, '\*.tif']);
 
 %load the image
@@ -22,19 +19,19 @@ imgRGB(:,:,1) = img;
 imgRGB(:,:,2) = img;
 imgRGB(:,:,3) = img;
 
-% fig = figure(1)  
-% imagesc(imgRGB), axis image, axis off;
-% edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, frame_list, replaced_path, root_path, savePath)
+fig = figure(1)  
+imagesc(imgRGB), axis image, axis off;
+edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, frame_list, savePath)
 
 fig = figure(2)   
 imagesc(imgRGB), axis image, axis off;
-windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list, replaced_path,root_path);
+windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list);
 
 end
 %%
-function edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, frame_list, replaced_path, root_path, savePath)
+function edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, frame_list, savePath)
     mask_path = [movieData.processes_{1,2}.outFilePaths_{1,1}, '\'];
-    mask_path = strrep(mask_path,replaced_path,root_path)
+    mask_path = replace_root_path(mask_path)
     mask_file_names = dir([mask_path, '*.tif']);
     
     color_grad = colormap(jet(length(frame_list)));
@@ -68,9 +65,9 @@ function edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thicknes
 end
 
 %%
-function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list, replaced_path,root_path) 
+function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list) 
     mask_path = [movieData.processes_{1,2}.outFilePaths_{1,1}, '\'];
-    mask_path = strrep(mask_path,replaced_path,root_path);
+    mask_path = replace_root_path(mask_path)
     mask_file_names = dir([mask_path, '*.tif']);
     
     mask_loop_counter = 1;
@@ -93,7 +90,7 @@ function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thi
         
         %% Get the windows
         windows_path = movieData.processes_{iWinProc}.outFilePaths_;
-        windows_path = strrep(windows_path,replaced_path,root_path);
+        windows_path = replace_root_path(windows_path);
         wins = load([windows_path, '\windows_frame__frame_', sprintf( '%03d', iFrame ) ]).windows;
         window_exist = 0;
         
@@ -101,9 +98,10 @@ function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thi
         index = 1;
         %indexed by windows
         for iWin = windowing
+            
             %check whether the protrusion oneset starts or not
             if (time(index) <= iFrame) && (time(index) + duration_time(index, 1) >= iFrame )
-                if ~isempty(wins{iWin})
+                if length(wins)>=iWin && ~isempty(wins{iWin})
                     if ~isempty(wins{iWin}{1})
                         windowsPoly = [wins{iWin}{1}{:}];
                         if range(windowsPoly(1,:))<3*movieData.processes_{iWinProc}.funParams_.ParaSize
@@ -127,18 +125,19 @@ function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thi
     for iFrame = frame_list
         %% Get the windows
         windows_path = movieData.processes_{iWinProc}.outFilePaths_;
-        windows_path = strrep(windows_path,replaced_path,root_path);
+        windows_path = replace_root_path(windows_path);
         wins = load([windows_path, '\windows_frame__frame_', sprintf( '%03d', iFrame ) ]).windows;
     %     wins = movieData.processes_{iWinProc}.loadChannelOutput(iFrame);
-
+        iFrame
         %for each frame and window, draw different sample and different
         %cluster.    
         index = 1;
         %indexed by windows
         for iWin = windowing
+            
             %check whether the protrusion oneset starts or not
             if (time(index) <= iFrame) && (time(index) + duration_time(index, 1) >= iFrame )
-                if ~isempty(wins{iWin})
+                if length(wins)>=iWin && ~isempty(wins{iWin})
                     if ~isempty(wins{iWin}{1})
                         windowsPoly = [wins{iWin}{1}{:}];
                         if range(windowsPoly(1,:))<3*movieData.processes_{iWinProc}.funParams_.ParaSize

@@ -1,17 +1,16 @@
-function make_evolution_movie(movieData, windowing, time, clusters, N, duration_time, cluster_cmap, cell_name, video_format, frame_rate, savePath)
 % Created by Chauncey Wang
 % Modified by Junbong Jang for Prof.Lee's chalktalk preparation
 % 5/20/2020 
 % Create a video of windowed edge evolution with different clusters in different colors.
 
+function make_evolution_movie(movieData, windowing, time, clusters, N, duration_time, cluster_cmap, cell_name, video_format, frame_rate, savePath)
+
 nFrame = movieData.nFrames_;
-replaced_path = 'C:\Users\fanzhang\Dropbox (QCI)\QCI Team Folder\Kwonmoo\';
-root_path = '\\research.wpi.edu\leelab\QCI dropbox\Kwonmoo\';
 
 %%
 %Use the raw data as the image directories.
 imDir = movieData.getChannelPaths{1};
-imDir = strrep(imDir,replaced_path,root_path)
+imDir = replace_root_path(imDir);
 imNames = dir([imDir, '\*.tif']);
 iWinProc = movieData.getProcessIndex('WindowingProcess', 1, 1);
 
@@ -42,7 +41,7 @@ for iFrame = 1 : nFrame
     
     %get the windows
     windows_path = movieData.processes_{iWinProc}.outFilePaths_;
-    windows_path = strrep(windows_path,replaced_path,root_path);
+    windows_path = replace_root_path(windows_path);
     wins = load([windows_path, '\windows_frame__frame_', sprintf( '%03d', iFrame ) ]).windows;
     
     [m, nWin] = size(wins);
@@ -55,7 +54,7 @@ for iFrame = 1 : nFrame
     for iWin = windowing
         %check whether the protrusion oneset starts or not
         if (time(index) <= iFrame) && (time(index) + duration_time(index, 1) >= iFrame )
-            if ~isempty(wins{iWin})
+            if length(wins)>=iWin && ~isempty(wins{iWin})
                 if ~isempty(wins{iWin}{1})
                     windowsPoly = [wins{iWin}{1}{:}];
                     if range(windowsPoly(1,:))<3*movieData.processes_{iWinProc}.funParams_.ParaSize %why, I do not know
