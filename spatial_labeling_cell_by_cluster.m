@@ -8,8 +8,8 @@ function label_cluster = spatial_labeling_cell_by_cluster(label_cluster, windowi
         else
             total_len_vel = sum(~isnan(vel(1, 201:end)));
             len_vel = sum(~isnan(vel(1, 201:end_frame)));
-            label_cluster(windowing(i), time(i): time(i) + total_len_vel - 1) = -1;
-            label_cluster(windowing(i), time(i): time(i) + len_vel - 1) = cluster(1, i);
+            label_cluster(windowing(i), time(i): time(i) + total_len_vel - 1) = -1;  % first color whole segment white
+            label_cluster(windowing(i), time(i): time(i) + len_vel - 1) = cluster(1, i);  % 50 frames to cluster color
         end
     end
 end
