@@ -3,7 +3,7 @@
 % 5/20/2020 
 % Create a video of windowed edge evolution with different clusters in different colors.
 
-function make_evolution_movie(movieData, windowing, time, clusters, N, duration_time, cluster_cmap, cell_name, video_format, frame_rate, savePath)
+function make_evolution_movie(movieData, windowing, time, clusters, duration_time, cluster_cmap, cell_name, video_format, frame_rate, savePath, hacks_type)
 
 nFrame = movieData.nFrames_;
 
@@ -15,14 +15,15 @@ imNames = dir([imDir, '\*.tif']);
 iWinProc = movieData.getProcessIndex('WindowingProcess', 1, 1);
 
 % create video with image sequence
-video_path = [savePath, '\..\', cell_name, '_video', video_format];
+video_path = [savePath, '\..\', cell_name, '_', hacks_type,'_video', video_format];
 outputVideo = VideoWriter(video_path);
 outputVideo.FrameRate = frame_rate;
 open(outputVideo);
 
 %Load the image(s).
 for iFrame = 1 : nFrame
-	fig = figure('visible','off','units','pixels','position',[0 0 1920 1080]);
+    
+    figure('Name','Movie Figure','visible','off','units','pixels','position',[0 0 1920 1080])
     axis tight
     iFrame
     %load the image
@@ -74,6 +75,5 @@ for iFrame = 1 : nFrame
     F = getframe(gcf);
     [image, Map] = frame2im(F);
     writeVideo(outputVideo,image);
-    close all;
 end
 close(outputVideo);

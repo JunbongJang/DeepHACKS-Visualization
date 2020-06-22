@@ -3,9 +3,8 @@
 % 5/18/2020 
 
 function make_all_movie_clusters(path_windowing, input_HACKS_cluster, input_deepHACKS_cluster, all_cellnames, all_dminpool, unique_cellnames, ...
-        edge_evolution_line_thickness, frame_interval, start_frame, end_frame, video_format, HACKS_cmap, deepHACKS_cmap, ...
-        hacks_type, data_granularity)
-    saved_folder = ['.\windowing_edge_evolution\', 'paired_CyD_DMSO_', hacks_type, '_', data_granularity];
+        edge_evolution_line_thickness, frame_interval, start_frame, end_frame, video_format, HACKS_cmap, deepHACKS_cmap, data_granularity)
+    saved_folder = ['.\windowing_edge_evolution\', 'paired_CyD_DMSO', '_', data_granularity];
     mkdir(saved_folder);
     
     %%
@@ -44,9 +43,9 @@ function make_all_movie_clusters(path_windowing, input_HACKS_cluster, input_deep
 %                 cluster = orig_to_FG_cluster(cluster, cluster_FG_Burst(cellname_burst_indices), cluster_FG_Acc(cellname_accel_indices));
 %             end
             %% save time windowing cluster data
-            savePath = [saved_folder, '\', cell_name];
-            if exist(savePath) ~= 7
-                mkdir(savePath);
+            save_path = [saved_folder, '\', cell_name];
+            if exist(save_path) ~= 7
+                mkdir(save_path);
             end
 %             save([saved_folder,'\', cell_name, '\time_windowing_cluster.mat'], 'time', 'windowing', 'cluster');
 
@@ -54,12 +53,12 @@ function make_all_movie_clusters(path_windowing, input_HACKS_cluster, input_deep
             movie_HACKS_cmap = HACKS_cmap(3:end,:,:);  % since we don't need background color and white color for frames after 251
             movie_deepHACKS_cmap = deepHACKS_cmap(3:end,:,:);
             
-%             make_evolution_movie(movieData, windowing, time, cluster, max(all_cluster(:)), duration_time, movie_cluster_cmap, cell_name, video_format, frame_interval, savePath);
-%             make_evolution_image(movieData, windowing, time, cluster, max(all_cluster(:)), duration_time, movie_cluster_cmap, frame_list, edge_evolution_line_thickness, savePath);
-
+            make_evolution_movie(movieData, windowing, time, HACKS_cluster, duration_time, movie_HACKS_cmap, cell_name, video_format, frame_interval, save_path, 'HACKS');
+            make_evolution_movie(movieData, windowing, time, deepHACKS_cluster, duration_time, movie_deepHACKS_cmap, cell_name, video_format, frame_interval, save_path, 'deepHACKS');
+            make_evolution_image(movieData, windowing, time, HACKS_cluster, deepHACKS_cluster, duration_time, movie_HACKS_cmap, movie_deepHACKS_cmap, frame_list, edge_evolution_line_thickness, save_path);
             %% protrusion and cluster heatmap
             path_windowing_package = 'WindowingPackage\protrusion_samples';
-            make_heatmap_image(HACKS_cmap, deepHACKS_cmap, windowing, time, HACKS_cluster, deepHACKS_cluster, dminpoolv, cell_name, path_windowing, path_windowing_package, saved_folder)
+            make_heatmap_image(HACKS_cmap, deepHACKS_cmap, windowing, time, HACKS_cluster, deepHACKS_cluster, dminpoolv, cell_name, path_windowing, path_windowing_package, save_path)
 
         end
     end

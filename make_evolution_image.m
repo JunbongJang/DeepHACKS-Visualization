@@ -3,7 +3,7 @@
 % 5/18/2020 
 % Draw windows and edge evolution image with clusters in different colors.
 
-function make_evolution_image(movieData, windowing, time, clusters, N, duration_time, cluster_cmap, frame_list, edge_evolution_line_thickness, savePath)
+function make_evolution_image(movieData, windowing, time, HACKS_cluster, deepHACKS_cluster, duration_time, movie_HACKS_cmap, movie_deepHACKS_cmap, frame_list, edge_evolution_line_thickness, savePath, hacks_type)
 %Use the raw data as the image directories.
 iWinProc = movieData.getProcessIndex('WindowingProcess', 1, 1);
 imDir = movieData.getChannelPaths{1};
@@ -25,7 +25,11 @@ edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, frame_
 
 fig = figure(2)   
 imagesc(imgRGB), axis image, axis off;
-windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list);
+windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, HACKS_cluster, duration_time, movie_HACKS_cmap, iWinProc, frame_list, savePath, 'HACKS');
+
+fig = figure(3)   
+imagesc(imgRGB), axis image, axis off;
+windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, deepHACKS_cluster, duration_time, movie_deepHACKS_cmap, iWinProc, frame_list, savePath, 'deepHACKS');
 
 end
 %%
@@ -65,12 +69,14 @@ function edgeEvolution(movieData, imgRGB, row, col, edge_evolution_line_thicknes
 end
 
 %%
-function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, savePath, iWinProc, frame_list) 
+function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thickness, windowing, time, clusters, duration_time, cluster_cmap, iWinProc, frame_list, savePath, hacks_type) 
     mask_path = [movieData.processes_{1,2}.outFilePaths_{1,1}, '\'];
     mask_path = replace_root_path(mask_path)
     mask_file_names = dir([mask_path, '*.tif']);
     
     mask_loop_counter = 1;
+    window_index_indicator = 0;
+    
     for iFrame = frame_list
         disp(iFrame)
         
@@ -106,12 +112,17 @@ function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thi
                         windowsPoly = [wins{iWin}{1}{:}];
                         if range(windowsPoly(1,:))<3*movieData.processes_{iWinProc}.funParams_.ParaSize
                             window_exist = 1;
+%                             draw window index text in the image
+%                             if window_index_indicator == 0
+%                                 imgRGB = insertText(imgRGB,[windowsPoly(1,1), windowsPoly(2,1)],'start                 ','AnchorPoint','Center','BoxColor','red','BoxOpacity',0.4,'FontSize',8,'TextColor','white');
+%                                 window_index_indicator = 1;
+%                             end
                             break;
                         end
                     end
                 end
             end 
-            index = index + 1; 
+            index = index + 1;
         end
         
         if window_exist
@@ -146,12 +157,13 @@ function windowingEvolution(movieData, imgRGB, row, col, edge_evolution_line_thi
                     end
                 end
             end 
+            
             index = index + 1; 
         end 
     end
     colormap(cluster_cmap)
     colorbar('Ticks',  linspace(0, 1, size(cluster_cmap,1)), 'YTickLabel', num2cell(1:size(cluster_cmap,1)))
-    saveas(gcf, [savePath, '\windowing_evolution.png']);
+    saveas(gcf, [savePath, '\windowing_evolution_', hacks_type, '.png']);
 end
 
 %%
